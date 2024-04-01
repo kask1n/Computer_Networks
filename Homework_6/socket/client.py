@@ -18,6 +18,10 @@ def receive():
             message = client.recv(1024).decode("utf-8")
             if message == "NICK":
                 client.send(nickname.encode("utf-8"))
+            elif message == "!quit":
+                print(">>> Logged out.")
+                client.close()
+                break
             else:
                 print(message)
         except:
@@ -29,8 +33,14 @@ def receive():
 
 def write():
     while True:
-        message = "{}: {}".format(nickname, input(""))
-        client.send(message.encode("utf-8"))
+        data_in = input("")
+        if data_in == "!quit":
+            client.send(data_in.encode("utf-8"))
+            # client.close()
+            break
+        else:
+            message = "{}: {}".format(nickname, data_in)
+            client.send(message.encode("utf-8"))
 
 
 # Starting Threads For Listening And Writing

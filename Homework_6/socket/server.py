@@ -28,17 +28,28 @@ def handle(client):
         try:
             # Broadcasting Messages
             message = client.recv(1024)
-            broadcast(message)
+            if message == "!quit".encode("utf-8"):
+                client.send(message)
+                event_client_close(client)
+                break
+            else:
+                broadcast(message)
         except:
-            # Removing And Closing Clients
-            index = clients.index(client)
-            clients.remove(client)
-            client.close()
-
-            nickname = nicknames[index]
-            broadcast("{} left!".format(nickname).encode("utf-8"))
-            nicknames.remove(nickname)
+            event_client_close(client)
             break
+
+
+def event_client_close(client):
+    # Removing And Closing Clients
+    index = clients.index(client)
+    client.close()
+    clients.remove(client)
+
+    nickname = nicknames[index]
+    print("{} left!".format(nickname))
+
+    broadcast("{} left!".format(nickname).encode("utf-8"))
+    nicknames.remove(nickname)
 
 
 # Receiving / Listening Function
@@ -57,7 +68,7 @@ def receive():
         # Print And Broadcast Nickname
         print("Nickname is {}".format(nickname))
         broadcast("{} joined!".format(nickname).encode("utf-8"))
-        client.send("Connected to server!".encode("utf-8"))
+        client.send("Connected to server! Press >>> !quit <<< to exit".encode("utf-8"))
 
         # Start Handling Thread For Client
         thread = threading.Thread(target=handle, args=(client,))
